@@ -2,6 +2,8 @@
 
 Spring Boot 如何集成 mybatis-plus,并引入逆向工程。
 
+mybatis-plus官网 https://mp.baomidou.com/
+
 ### pom.xml
 
     <?xml version="1.0" encoding="UTF-8"?>
@@ -27,3 +29,5 @@ Spring Boot 如何集成 mybatis-plus,并引入逆向工程。
     </project>
 
 其余配置见测试项目common-test下mybatis-plus-test
+
+* [mybatis-plus-test](https://github.com/zlk-github/common-test/blob/master/cgfbommon-db-test/README.md#mybatis-plus-test)
