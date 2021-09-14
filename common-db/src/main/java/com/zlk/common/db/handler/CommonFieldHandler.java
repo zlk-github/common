@@ -17,12 +17,14 @@ import java.util.Date;
 @Slf4j
 @Component
 public class CommonFieldHandler implements MetaObjectHandler {
+    @Override
     public void insertFill(MetaObject metaObject) {
         this.setFieldValByName("createTime", new Date(), metaObject);
         this.setFieldValByName("updateTime", new Date(), metaObject);
         //this.setInsertFieldValByName( "creater", getUser(), metaObject);
     }
 
+    @Override
     public void updateFill(MetaObject metaObject) {
         this.setFieldValByName("updateTime", new Date(), metaObject);
         //this.setUpdateFieldValByName("updateBy", getUser(), metaObject);
