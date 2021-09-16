@@ -48,6 +48,14 @@ public class Response<T> implements Serializable {
         return r;
     }
 
+    public static <T> Response<T> newSuccessResponse(T t) {
+        Response<T> r = new Response();
+        r.setSuccess(OK);
+        r.setData(t);
+        r.setError(new Response.Error("0000000", "成功"));
+        return r;
+    }
+
     @Data
     public static class Error implements Serializable {
         private static final long serialVersionUID = 1L;

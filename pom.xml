@@ -26,7 +26,7 @@
         <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
         <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
         <commons-lang3.version>3.7</commons-lang3.version>
-        <lombok.version>1.18.6</lombok.version>
+        <lombok.version>1.18.12</lombok.version>
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
         <mybatis-plus-generator.version>3.2.0</mybatis-plus-generator.version>
         <freemarker.version>2.3.29</freemarker.version>
