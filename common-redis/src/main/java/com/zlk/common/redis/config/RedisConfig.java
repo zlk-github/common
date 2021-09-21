@@ -1,5 +1,6 @@
 package com.zlk.common.redis.config;
 
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,13 +45,21 @@ public class RedisConfig extends CachingConfigurerSupport {
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jacksonSeial.setObjectMapper(om);
 
+
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+        // 全局开启AutoType，不建议使用
+        // ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
+        // 建议使用这种方式，小范围指定白名单
+        //ParserConfig.getGlobalInstance().addAccept("com.xiaolyuh.");
+
         // 值采用json序列化
         redisTemplate.setValueSerializer(jacksonSeial);
         //使用StringRedisSerializer来序列化和反序列化redis的key值
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-        // 设置hash key 和value序列化模式
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        // 设置hash key 和value序列化模式(new StringRedisSerializer()指定hash中map的key为string，本处未使用)
+        //redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(fastJsonRedisSerializer);
         redisTemplate.setHashValueSerializer(jacksonSeial);
         redisTemplate.afterPropertiesSet();
 

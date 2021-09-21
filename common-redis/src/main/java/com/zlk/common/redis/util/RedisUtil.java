@@ -43,8 +43,8 @@ public class RedisUtil {
      * @param keys redis键set集合
      * @return 执行结果 true成功，false失败
      */
-    public void del(Set<String> keys){
-        redisTemplate.delete(keys);
+    public Long del(Set<String> keys){
+        return redisTemplate.delete(keys);
     }
 
     //==========================String==============================
@@ -60,13 +60,14 @@ public class RedisUtil {
             redisTemplate.opsForValue().set(key,value,time, TimeUnit.SECONDS);
             return true;
         }catch (Exception ex) {
-           log.error("写入redis缓存失败。key:{},value:{}",key,value,ex);
+            log.error("写入redis缓存失败。key:{},value:{}",key,value,ex);
         }
         return false;
     }
 
     /**
      * 入普通缓存（字符串类型）
+     * --key不存在则新增，key已存在则覆盖原来值。
      * @param key redis键
      * @param value 值
      * @return 执行结果 true成功，false失败
@@ -104,7 +105,7 @@ public class RedisUtil {
      * @param time 过期时间（单位秒）
      * @return 执行结果 true成功，false失败
      */
-    public Boolean hmSet(String key, Map<Object,Object> map, long time){
+    public <T,V> Boolean hmSet(String key, Map<T,V> map, long time){
         try {
             redisTemplate.opsForHash().putAll(key,map);
             redisTemplate.expire(key, time, TimeUnit.SECONDS);
@@ -121,7 +122,7 @@ public class RedisUtil {
      * @param map map值
      * @return 执行结果 true成功，false失败
      */
-    public Boolean hmSet(String key, Map<Object,Object> map){
+    public <T,V> Boolean hmSet(String key, Map<T,V> map){
         try {
             redisTemplate.opsForHash().putAll(key,map);
             return true;
@@ -199,9 +200,9 @@ public class RedisUtil {
     /**
      *  删除key对应map中某些键值（hash表）
      * @param key redis键
-     * @return items
+     * @return items map<item,value>
      */
-    public void hDel(String key,Object items){
+    public void hDel(String key,Object... items){
         redisTemplate.opsForHash().delete(key, items);
     }
 
@@ -260,8 +261,8 @@ public class RedisUtil {
             return redisTemplate.opsForHash().hasKey(key, item);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return false;
         }
+        return false;
     }
 
     //==========================链表list==============================
@@ -272,7 +273,7 @@ public class RedisUtil {
      * @param time 过期时间（单位秒）
      * @return 执行结果 true成功，false失败
      */
-    public Boolean lSet(String key, List<Object> list, long time){
+    public <T> Boolean llSet(String key, List<T> list, long time){
         try {
             redisTemplate.opsForList().rightPushAll(key,list);
             redisTemplate.expire(key, time, TimeUnit.SECONDS);
@@ -289,7 +290,7 @@ public class RedisUtil {
      * @param list list链表
      * @return 执行结果 true成功，false失败
      */
-    public Boolean lSet(String key, List<Object> list){
+    public <T> Boolean llSet(String key, List<T> list){
         try {
             redisTemplate.opsForList().rightPushAll(key,list);
             return true;
@@ -391,12 +392,12 @@ public class RedisUtil {
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return false;
         }
+        return false;
     }
 
     /**
-     * 移除list中值为value的数据。
+     * 删除列表中值为value的元素，总共删除count次(不常用)
      * @param key   键
      * @param index 索引
      * @param value 值
@@ -404,13 +405,29 @@ public class RedisUtil {
      */
     public Long lRemove(String key, long index, Object value) {
         try {
-            Long remove = redisTemplate.boundListOps(key).remove(index, value);
+            Long remove = redisTemplate.opsForList().remove(key,index,value);
             return Long.valueOf(remove);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return 0L;
+        }
+        return 0L;
+    }
+
+    /**
+     * 删除list首尾，只保留 [start, end] 之间的值，闭区间
+     * @param key   键
+     * @param start 索引开始
+     * @param end 索引结束
+     * @return 移除的个数
+     */
+    public void lTrim(String key, long start, long end) {
+        try {
+            redisTemplate.opsForList().trim(key,start,end);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
+
 
     //==========================无序Set==============================
     /**
@@ -491,8 +508,8 @@ public class RedisUtil {
             return redisTemplate.boundSetOps(key).size();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return 0L;
         }
+        return 0L;
     }
 
     /**
@@ -505,8 +522,8 @@ public class RedisUtil {
             return redisTemplate.opsForSet().members(key);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return 0L;
         }
+        return 0L;
     }
 
     /**
@@ -514,7 +531,8 @@ public class RedisUtil {
      * @param key    键
      * @param set 值 可以是多个
      */
-    public long sRemove(String key, Set<Object> set) {
+    public <T> long sRemove(String key, Set<T> set) {
+
         Long remove = redisTemplate.boundSetOps(key).remove(set);
         return remove;
     }
@@ -549,8 +567,8 @@ public class RedisUtil {
             return redisTemplate.boundZSetOps(key).size();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return 0L;
         }
+        return 0L;
     }
 
     /**
@@ -585,8 +603,8 @@ public class RedisUtil {
             return redisTemplate.opsForZSet().rangeByScore(key,min,max);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return 0L;
         }
+        return 0L;
     }
 
     /**

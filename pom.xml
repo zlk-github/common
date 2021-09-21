@@ -37,6 +37,7 @@
         <mybatis-plus-generator.version>3.2.0</mybatis-plus-generator.version>
         <freemarker.version>2.3.29</freemarker.version>
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
+        <fastjson.version>1.2.58</fastjson.version>
     </properties>
 
     <dependencies>
@@ -68,5 +69,18 @@
             <version>${springfox-swagger2.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
