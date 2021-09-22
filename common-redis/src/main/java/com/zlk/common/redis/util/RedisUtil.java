@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -523,7 +520,7 @@ public class RedisUtil {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return 0L;
+        return null;
     }
 
     /**
@@ -603,7 +600,7 @@ public class RedisUtil {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return 0L;
+        return null;
     }
 
     /**
