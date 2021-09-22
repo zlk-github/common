@@ -562,7 +562,7 @@ public class RedisUtil {
      * @param key redis键
      * @return
      */
-    public Long zsSize(String key) {
+    public long zsSize(String key) {
         try {
             return redisTemplate.boundZSetOps(key).size();
         } catch (Exception e) {
@@ -578,7 +578,7 @@ public class RedisUtil {
      * @param sore 加分数
      * @return  加后分数
      */
-    private Double zsIncr(String key,Object value,long sore) {
+    public <T>  Double zsIncr(String key,T value,long sore) {
         return  redisTemplate.boundZSetOps(key).incrementScore(value, sore);
     }
 
@@ -586,9 +586,8 @@ public class RedisUtil {
      * 获取Zset中某项分数（有序zSet）
      * @param key  redis键
      * @param value 值
-     * @param sore 分数
      */
-    private Double incrementScore(String key,Object value,long sore) {
+    public <T> Double zsGetScore(String key,T value) {
         return  redisTemplate.boundZSetOps(key).score(value);
     }
 
@@ -612,7 +611,7 @@ public class RedisUtil {
      * @param key    键
      * @param set 值 可以是多个
      */
-    public long zsRemove(String key, Set<Object> set) {
+    public <T> long zsRemove(String key, Set<T> set) {
         Long remove = redisTemplate.boundZSetOps(key).remove(set);
         return remove;
     }
