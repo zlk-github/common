@@ -17,7 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @author likuan.zhou
  * @title: RedisConfig
  * @projectName common
- * @description: redis 配置类
+ * @description: redis缓存-配置类
  * @date 2021/9/16/016 19:05
  */
 @Configuration
