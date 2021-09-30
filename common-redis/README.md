@@ -14,10 +14,14 @@ Spring Boot 如何集成redis做缓存(默认过期时间),分布式锁，布隆
 
     Redis集群 https://www.cnblogs.com/yufeng218/p/13688582.html
 
-    redis官网 https://www.redis.net.cn/tutorial/3501.html || https://redis.io/download
+    Redis官网 https://www.redis.net.cn/tutorial/3501.html || https://redis.io/download
     
-    redis源码地址：https://github.com/redis/redis
+    Redis源码地址：https://github.com/redis/redis
     
-    springboot redis 文档：https://docs.spring.io/spring-data/redis/docs/2.0.3.RELEASE/reference/html/
+    Springboot redis 文档：https://docs.spring.io/spring-data/redis/docs/2.0.3.RELEASE/reference/html/
 
-    redis速度为什么这么快 https://blog.csdn.net/xlgen157387/article/details/79470556
+    Redis速度为什么这么快 https://blog.csdn.net/xlgen157387/article/details/79470556
+    
+    Redisson中文文档（完整） https://github.com/redisson/redisson/wiki/目录
+
+    Redisson锁 https://github.com/redisson/redisson/wiki/8.-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%92%8C%E5%90%8C%E6%AD%A5%E5%99%A8
