@@ -1,4 +1,4 @@
-package com.zlk.common.redis.redission;
+package com.zlk.common.redis.redisson;
 
 import org.redisson.api.RFuture;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
  * @description: Redission分布式锁接口
  * @date 2021/9/23/023 9:23
  */
-public interface IRedissionLock {
+public interface IRedissonLock {
     //===============================可重入锁（Reentrant Lock）=====================================
     //基于Redis的Redisson分布式可重入锁RLock Java对象实现了java.util.concurrent.locks.Lock接口。同时还提供了异步（Async）、反射式（Reactive）和RxJava2标准的接口
     /**

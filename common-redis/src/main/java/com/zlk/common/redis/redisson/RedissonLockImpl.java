@@ -1,4 +1,4 @@
-package com.zlk.common.redis.redission;
+package com.zlk.common.redis.redisson;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.RedissonMultiLock;
@@ -15,14 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author likuan.zhou
- * @title: RedissionLockImpl
+ * @title: RedissonLockImpl
  * @projectName common
  * @description: Redission分布式锁接口实现
  * @date 2021/9/27/027 8:57
  */
 @Slf4j
 @Component
-public class RedissionLockImpl implements IRedissionLock {
+public class RedissonLockImpl implements IRedissonLock {
     @Autowired
     private RedissonClient redisson;
 
