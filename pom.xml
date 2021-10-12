@@ -16,6 +16,7 @@
         <module>common-db</module>
         <module>common-rocketmq</module>
         <module>common-oss</module>
+        <module>common-web</module>
     </modules>
 
     <parent>
