@@ -22,14 +22,14 @@ public interface IRedissonLock {
      Boolean addLock(String key);
 
     /**
-     * 释放redisson分布式锁（可重入锁--普通类型）
+     * 释放redisson分布式锁（可重入锁）
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
      Boolean removeLock(String key);
 
     /**
-     * 加redisson分布式锁（可重入锁--普通类型--自定义过期）
+     * 加redisson分布式锁（可重入锁--过期类型（看门狗失效））
      * @param key redis锁key
      * @param time 锁自动释放时间（单位S）
      * @return 执行结果 true成功，false失败
@@ -37,7 +37,7 @@ public interface IRedissonLock {
      Boolean addLock(String key,long time);
 
     /**
-     * 加redisson分布式锁（可重入锁--等待类型）
+     * 加redisson分布式锁（可重入锁--过期（看门狗失效）--等待类型）
      * 尝试加锁，最多等待waitTime秒，上锁以后time秒自动解锁。超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
@@ -45,7 +45,7 @@ public interface IRedissonLock {
      Boolean addTryLock(String key,long waitTime,long time);
 
     /**
-     * 加redisson分布式锁（可重入锁-异步执行）
+     * 加redisson分布式锁（可重入锁--异步执行--过期（看门狗失效）--等待类型）
      * 尝试加锁，最多等待waitTime秒，上锁以后time秒自动解锁。超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
      * @return 执行结果 true成功，false失败

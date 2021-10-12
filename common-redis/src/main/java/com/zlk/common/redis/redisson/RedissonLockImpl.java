@@ -27,11 +27,12 @@ public class RedissonLockImpl implements IRedissonLock {
     private RedissonClient redisson;
 
     //===============================可重入锁（Reentrant Lock）=====================================
-    //基于Redis的Redisson分布式可重入锁RLock Java对象实现了java.util.concurrent.locks.Lock接口。同时还提供了异步（Async）、反射式（Reactive）和RxJava2标准的接口
+    // 基于Redis的Redisson分布式可重入锁RLock Java对象实现了java.util.concurrent.locks.Lock接口。同时还提供了异步（Async）、反射式（Reactive）和RxJava2标准的接口
     // 可重入锁: 避免死锁，可重复递归调用的锁,同一线程外层函数获取锁后,内层递归函数仍然可以获取锁,并且不发生死锁(前提是同一个对象或者class)
+    // 设置超时类型，看门狗会失效
 
     /**
-     * 加redisson分布式锁
+     * 加redisson分布式锁（可重入锁--普通类型）
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
@@ -48,7 +49,7 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
-     * 释放redisson分布式锁
+     * 释放redisson分布式锁（可重入锁）
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
@@ -59,13 +60,13 @@ public class RedissonLockImpl implements IRedissonLock {
             lock.unlock();
             return true;
         }catch (Exception ex) {
-            log.error("分布式锁上锁失败。key:{}",key,ex);
+            log.error("分布式锁解锁失败。key:{}",key,ex);
         }
         return false;
     }
 
     /**
-     * 加redisson分布式锁
+     * 加redisson分布式锁（可重入锁--过期类型（看门狗失效））
      * @param key redis锁key
      * @param time 锁自动释放时间（单位S）
      * @return 执行结果 true成功，false失败
@@ -75,7 +76,7 @@ public class RedissonLockImpl implements IRedissonLock {
         try {
             RLock lock = redisson.getLock(key);
             // 加锁以后time秒钟自动解锁
-            // 无需调用unlock方法手动解锁
+            // 无需调用unlock方法手动解锁；也可以手动失效
             lock.lock(time, TimeUnit.SECONDS);
             return true;
         }catch (Exception ex) {
@@ -86,7 +87,7 @@ public class RedissonLockImpl implements IRedissonLock {
 
 
     /**
-     * 加redisson分布式锁（可重入锁--等待类型）
+     * 加redisson分布式锁（可重入锁--过期（看门狗失效）--等待类型）
      * @param time 上锁以后time秒自动解锁。
      * @param waitTime 尝试加锁，最多等待waitTime秒（单位S）,超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
@@ -97,8 +98,9 @@ public class RedissonLockImpl implements IRedissonLock {
         try {
             RLock lock = redisson.getLock(key);
             // 尝试加锁，最多等待waitTime秒，上锁以后time秒自动解锁。超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
-            // 需要unlock解锁
-            return lock.tryLock(100, 10, TimeUnit.SECONDS);
+            // 说明：尝试加锁的线程等待waitTime秒（超过时间未获取到锁返回false.否则返回true），超时执行下面逻辑。获取到锁的线程持有锁time秒后锁失效。
+            // 无需调用unlock方法手动解锁,锁到期会自动失效；也可以手动失效
+            return lock.tryLock(waitTime, time, TimeUnit.SECONDS);
         }catch (Exception ex) {
             log.error("分布式锁上锁失败。key:{}",key,ex);
         }
@@ -106,7 +108,7 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
-     * 加redisson分布式锁（可重入锁-异步执行）
+     * 加redisson分布式锁（可重入锁--异步执行--过期（看门狗失效）--等待类型）
      * 尝试加锁，最多等待waitTime秒，上锁以后time秒自动解锁。超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
@@ -118,7 +120,8 @@ public class RedissonLockImpl implements IRedissonLock {
             //lock.lockAsync();
             //lock.lockAsync(10, TimeUnit.SECONDS);
             // 可重入锁-异步执行
-            Future<Boolean> res = lock.tryLockAsync(100, 10, TimeUnit.SECONDS);
+            Future<Boolean> future = lock.tryLockAsync(waitTime, time, TimeUnit.SECONDS);
+            return future;
         }catch (Exception ex) {
             log.error("分布式锁上锁失败。key:{}",key,ex);
         }
