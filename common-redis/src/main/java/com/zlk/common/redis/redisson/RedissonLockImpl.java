@@ -6,10 +6,7 @@ import org.redisson.RedissonRedLock;
 import org.redisson.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -169,7 +166,7 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
-     * 加redisson分布式锁（可重入锁--公平锁--等待类型）
+     * 加redisson分布式锁（可重入锁--公平锁--自定义过期（看门狗失效）--等待类型）
      * @param time 上锁以后time秒自动解锁。
      * @param waitTime 尝试加锁，最多等待waitTime秒（单位S）,超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
@@ -191,7 +188,7 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
-     * 加redisson分布式锁（可重入锁--公平锁--等待--异步类型）
+     * 加redisson分布式锁（可重入锁--公平锁--过期（看门狗失效）--等待--异步类型）
      * @param time 上锁以后time秒自动解锁。
      * @param waitTime 尝试加锁，最多等待waitTime秒（单位S）,超过时间未获取到锁返回false.否则返回true。去执行下面逻辑。
      * @param key redis锁key
@@ -220,50 +217,42 @@ public class RedissonLockImpl implements IRedissonLock {
 
     /**
      * 加redisson分布式锁(联锁--普通类型)
-     * @param keySet redis锁key集合
+     * @param rLocks rLocks集合
      * @return 执行结果 true成功，false失败
      */
-    public Boolean addMultiLock(Set<String> keySet) {
-        if (CollectionUtils.isEmpty(keySet)) {
+    @Override
+    public Boolean addMultiLock(RLock... rLocks) {
+        if (rLocks == null) {
             return false;
         }
-        RedissonMultiLock lock;
         try {
-            Set<RLock> lockSet = new HashSet<>();
-            keySet.forEach(key->{
-                lockSet.add(redisson.getLock(key));
-            });
-            lock = new RedissonMultiLock(lockSet.stream().iterator().next());
+            RedissonMultiLock lock = new RedissonMultiLock(rLocks);
             // 同时加锁：lock1 lock2 lock3.......
             // 联锁 所有的锁都上锁成功才算成功。
             lock.lock();
             return true;
         }catch (Exception ex) {
-            log.error("分布式锁--联锁上锁失败。keySet:{}",keySet,ex);
+            log.error("分布式锁--联锁上锁失败。rLocks:{}",rLocks,ex);
         }
         return false;
     }
 
     /**
      * 解除redisson分布式锁(联锁--普通类型)
-     * @param keySet redis锁key集合
+     * @param rLocks rLocks集合
      * @return 执行结果 true成功，false失败
      */
-    public Boolean removeMultiLock(Set<String> keySet) {
-        if (CollectionUtils.isEmpty(keySet)) {
+    @Override
+    public Boolean removeMultiLock(RLock... rLocks) {
+        if (rLocks == null) {
             return false;
         }
-        RedissonMultiLock lock;
         try {
-            Set<RLock> lockSet = new HashSet<>();
-            keySet.forEach(key->{
-                lockSet.add(redisson.getLock(key));
-            });
-            lock = new RedissonMultiLock(lockSet.stream().iterator().next());
+            RedissonMultiLock lock = new RedissonMultiLock(rLocks);
             lock.unlock();
             return true;
         }catch (Exception ex) {
-            log.error("分布式锁--联锁解锁失败。keySet:{}",keySet,ex);
+            log.error("分布式锁--联锁解锁失败。rLocks:{}",rLocks,ex);
         }
         return false;
     }
@@ -279,54 +268,46 @@ public class RedissonLockImpl implements IRedissonLock {
 
     //=============================== 红锁（RedLock）=====================================
     // 基于Redis的Redisson红锁RedissonRedLock对象实现了Redlock介绍的加锁算法。该对象也可以用来将多个RLock对象关联为一个红锁，每个RLock对象实例可以来自于不同的Redisson实例。
-    // 联锁: 同时加锁，大部分锁节点加锁成功就算成功。
+    // 红锁: 同时加锁，大部分锁节点加锁成功就算成功。locks.size() / 2 + 1为成功
 
     /**
      * 加redisson分布式锁(红锁--普通类型)
-     * @param keySet redis锁key集合
+     * @param rLocks rLocks
      * @return 执行结果 true成功，false失败
      */
-    public Boolean addRedLock(Set<String> keySet) {
-        if (CollectionUtils.isEmpty(keySet)) {
+    @Override
+    public Boolean addRedLock(RLock... rLocks) {
+        if (rLocks == null) {
             return false;
         }
-        RedissonRedLock lock;
         try {
-            Set<RLock> lockSet = new HashSet<>();
-            keySet.forEach(key->{
-                lockSet.add(redisson.getLock(key));
-            });
-            lock = new RedissonRedLock(lockSet.stream().iterator().next());
+            RedissonRedLock lock = new RedissonRedLock(rLocks);
             // 同时加锁：lock1 lock2 lock3.......
-            // 红锁在大部分节点上加锁成功就算成功。
+            // 红锁在大部分节点上加锁成功就算成功。locks.size() / 2 + 1为成功
             lock.lock();
             return true;
         }catch (Exception ex) {
-            log.error("分布式锁--红锁上锁失败。keySet:{}",keySet,ex);
+            log.error("分布式锁--红锁上锁失败。rLocks:{}",rLocks,ex);
         }
         return false;
     }
 
     /**
      * 解除redisson分布式锁(红锁--普通类型)
-     * @param keySet redis锁key集合
+     * @param rLocks rLocks
      * @return 执行结果 true成功，false失败
      */
-    public Boolean removeRedLock(Set<String> keySet) {
-        if (CollectionUtils.isEmpty(keySet)) {
+    @Override
+    public Boolean removeRedLock(RLock... rLocks) {
+        if (rLocks == null) {
             return false;
         }
-        RedissonRedLock lock;
         try {
-            Set<RLock> lockSet = new HashSet<>();
-            keySet.forEach(key->{
-                lockSet.add(redisson.getLock(key));
-            });
-            lock = new RedissonRedLock(lockSet.stream().iterator().next());
+            RedissonRedLock lock = new RedissonRedLock(rLocks);
             lock.unlock();
             return true;
         }catch (Exception ex) {
-            log.error("分布式锁--红锁解锁失败。keySet:{}",keySet,ex);
+            log.error("分布式锁--红锁解锁失败。rLocks:{}",rLocks,ex);
         }
         return false;
     }
@@ -343,13 +324,14 @@ public class RedissonLockImpl implements IRedissonLock {
     //===============================读写锁（ReadWriteLock）=====================================
     // 基于Redis的Redisson分布式可重入读写锁RReadWriteLock Java对象实现了java.util.concurrent.locks.ReadWriteLock接口。其中读锁和写锁都继承了RLock接口。
     // 读写锁: 分布式可重入读写锁允许同时有多个读锁和一个写锁处于加锁状态。
-
+    // 读锁使用共享模式；写锁使用独占模式。
     /**
      * 加redisson分布式锁(可重入读写锁)
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
-    public Boolean addRwLock(String key) {
+    @Override
+    public Boolean addRwrLock(String key) {
         RReadWriteLock readWriteLock;
         try {
             readWriteLock = redisson.getReadWriteLock(key);
@@ -365,14 +347,53 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
+     * 加redisson分布式锁(可重入读写锁)
+     * @param key redis锁key
+     * @return 执行结果 true成功，false失败
+     */
+    @Override
+    public Boolean addRwwLock(String key) {
+        RReadWriteLock readWriteLock;
+        try {
+            readWriteLock = redisson.getReadWriteLock(key);
+            // 读
+            //readWriteLock.readLock().lock();
+            // 或者 写
+            readWriteLock.writeLock().lock();
+            return true;
+        }catch (Exception ex) {
+            log.error("分布式锁--可重入读写锁上锁失败。key:{}",key,ex);
+        }
+        return false;
+    }
+
+    /**
      * 解除redisson分布式锁(可重入读写锁)
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
-    public Boolean removeRwLock(String key) {
+    @Override
+    public Boolean removeRwrLock(String key) {
         try {
             RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
             readWriteLock.readLock().unlock();
+            return true;
+        }catch (Exception ex) {
+            log.error("分布式锁--可重入读写锁上锁失败。key:{}",key,ex);
+        }
+        return false;
+    }
+
+    /**
+     * 解除redisson分布式锁(可重入读写锁)
+     * @param key redis锁key
+     * @return 执行结果 true成功，false失败
+     */
+    @Override
+    public Boolean removeRwwLock(String key) {
+        try {
+            RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+            readWriteLock.writeLock().unlock();
             return true;
         }catch (Exception ex) {
             log.error("分布式锁--可重入读写锁上锁失败。key:{}",key,ex);
@@ -398,11 +419,33 @@ public class RedissonLockImpl implements IRedissonLock {
     // --如停车位，进出场地（车位有限）。唯一计数。
 
     /**
+     * 信号量初始值设置
+     * @param key redis锁key
+     * @param initVal 信号量初始值
+     * @return 执行结果 true成功，false失败
+     */
+    @Override
+    public Boolean trySetPermits(String key,int initVal) {
+        try {
+            //信号量
+            RSemaphore semaphore = redisson.getSemaphore(key);
+            //信号量初始值initVal
+            semaphore.trySetPermits(initVal);
+            return true;
+        }catch (Exception ex) {
+            log.error("信号量使用失败。key:{},initVal:{}",key,initVal,ex);
+        }
+        return false;
+    }
+
+
+    /**
      * 信号量使用
      * @param key redis锁key
      * @param val 信号量减少值
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean useSemaphore(String key,int val) {
         try {
             //信号量
@@ -421,6 +464,7 @@ public class RedissonLockImpl implements IRedissonLock {
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean useSemaphore(String key) {
         try {
             //信号量
@@ -436,11 +480,12 @@ public class RedissonLockImpl implements IRedissonLock {
 
 
     /**
-     * 释放信号量使用
+     * 释放信号量
      * @param key redis锁key
      * @param val 信号量减少值
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean releaseSemaphore(String key,int val) {
         try {
             RSemaphore semaphore = redisson.getSemaphore(key);
@@ -454,10 +499,11 @@ public class RedissonLockImpl implements IRedissonLock {
     }
 
     /**
-     * 释放信号量使用
+     * 释放信号量
      * @param key redis锁key
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean releaseSemaphore(String key) {
         try {
             RSemaphore semaphore = redisson.getSemaphore(key);
@@ -492,11 +538,31 @@ public class RedissonLockImpl implements IRedissonLock {
     // 可过期性信号量: ID来辨识的信号量设置有效时间
 
     /**
+     * 可过期性信号量初始值设置
+     * @param key redis锁key
+     * @param initVal 信号量初始值
+     * @return 执行结果 true成功，false失败
+     */
+    @Override
+    public Boolean peTrySetPermits(String key,int initVal) {
+        try {
+            RPermitExpirableSemaphore semaphore = redisson.getPermitExpirableSemaphore(key);
+            // 可过期性信号量初始值
+            semaphore.trySetPermits(initVal);
+            return true;
+        }catch (Exception ex) {
+            log.error("可过期性信号量使用失败。key:{}",key,ex);
+        }
+        return false;
+    }
+
+    /**
      * 可过期性信号量
      * @param key 可过期性信号量标识
      * @param time 信号量过期时间 （单位s）
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean peSemaphore(String key,long time) {
         try {
             RPermitExpirableSemaphore semaphore = redisson.getPermitExpirableSemaphore(key);
@@ -514,6 +580,7 @@ public class RedissonLockImpl implements IRedissonLock {
      * @param key 可过期性信号量标识
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean releasePeSemaphore(String key) {
         try {
             RPermitExpirableSemaphore semaphore = redisson.getPermitExpirableSemaphore(key);
@@ -531,16 +598,34 @@ public class RedissonLockImpl implements IRedissonLock {
     // 闭锁: 计数清零时执行（如班上20个同学全部离开才能锁教室门）
 
     /**
-     * 闭锁 （加锁）
+     * 闭锁 （初始值）
      * @param key key
      * @param val 闭锁的计数初始值（如教室总人数）
      * @return 执行结果 true成功，false失败
      */
-    public Boolean addCountDownLatch(String key,long val) {
+    @Override
+    public Boolean trySetCount(String key,long val) {
         try {
-            RCountDownLatch latch = redisson.getCountDownLatch("anyCountDownLatch");
+            RCountDownLatch latch = redisson.getCountDownLatch(key);
             //闭锁的计数初始值（如教室总人数）
             latch.trySetCount(val);
+            return true;
+        }catch (Exception ex) {
+            log.error("闭锁失败。key:{}",key,ex);
+        }
+        return false;
+    }
+
+    /**
+     * 闭锁 （关门上锁）
+     * 当闭锁设置的初始值全部释放（调removeCountDownLatch方法使trySetCount清空为0），才往下执行，否则等待。
+     * @param key key
+     * @return 执行结果 true成功，false失败
+     */
+    @Override
+    public Boolean addCountDownLatch(String key) {
+        try {
+            RCountDownLatch latch = redisson.getCountDownLatch(key);
             // 当闭锁设置的初始值全部释放（调removeCountDownLatch方法使trySetCount清空为0），才往下执行，否则等待。
             latch.await();
             return true;
@@ -555,6 +640,7 @@ public class RedissonLockImpl implements IRedissonLock {
      * @param key key
      * @return 执行结果 true成功，false失败
      */
+    @Override
     public Boolean removeCountDownLatch(String key) {
         try {
             RCountDownLatch latch = redisson.getCountDownLatch(key);
@@ -566,8 +652,5 @@ public class RedissonLockImpl implements IRedissonLock {
         }
         return false;
     }
-
-
-
 
 }
