@@ -36,6 +36,13 @@
             <artifactId>redisson</artifactId>
             <version>${redisson.version}</version>
         </dependency>
+
+        <!--基于google的布隆表达式-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.1-jre</version>
+        </dependency>
     </dependencies>
 
 </project>
