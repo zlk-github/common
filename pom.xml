@@ -17,6 +17,8 @@
         <module>common-rocketmq</module>
         <module>common-oss</module>
         <module>common-web</module>
+        <module>common-xxl-job</module>
+        <module>common-exception</module>
     </modules>
 
     <parent>
