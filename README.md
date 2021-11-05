@@ -64,3 +64,11 @@ es
 NIO框架common-Netty 
 
     什么是IO，BIO，NIO，AIO
+
+### 15 common-spring_security
+
+    SpringSecurity+SpringSecurity+Oauth2+JWT实现第三方登录(认证授权与资源服务)
+    
+    对比方案：Shiro，Sa-Token。
+
+

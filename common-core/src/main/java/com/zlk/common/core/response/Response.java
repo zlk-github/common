@@ -7,69 +7,97 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @Description 重新封装返回实体
- * @Author wan
- * @Version V1.0.0
- * @Since 1.0
- * @Date 2021/07/27
- **/
-
+ * @author likuan.zhou
+ * @title: BeanExUtils
+ * @projectName common
+ * @description: 封装返回实体
+ * @date 2021/9/14/014 19:56
+ */
 @Data
 @ApiModel("响应体")
 public class Response<T> implements Serializable {
-    public static final String FAIL_CODE = "1111111";
-    public static final String OK_CODE = "0000000";
-    public static final Boolean OK = true;
-    public static final Boolean FAIL = false;
+    public static final String SYSTEM_FAIL_CODE = "500";
+    public static final String OK_CODE = "0";
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "是否成功")
-    private boolean success = true;
-    private Error error;
+    @ApiModelProperty(value = "0成功，非0错误描述")
+    private String code;
+    @ApiModelProperty(value = "描述（code为非0为错误描述）")
+    private String msg;
     @ApiModelProperty(value = "返回对象")
     protected T data;
 
     public Response() {
     }
 
-    public static <T> Response<T> newFailResponse(String msg) {
+    /**
+     * 只返回失败描述,系统异常
+     * @param <T>
+     * @return
+     */
+    public static <T> Response<T> newFailResponse() {
         Response<T> r = new Response<>();
-        r.setSuccess(FAIL);
-        r.setError(new Error(FAIL_CODE, msg));
+        r.setCode(SYSTEM_FAIL_CODE);
+        r.setMsg("系统开小差中，请稍后再试...");
         return r;
     }
 
+    /**
+     * 自定义code,返回描述。业务异常
+     * @param code
+     * @param <T>
+     * @return
+     */
+    public static <T> Response<T> newSuccessResponse(String code,String msg) {
+        Response<T> r = new Response<>();
+        r.setCode(code);
+        r.setMsg(msg);
+        return r;
+    }
+
+    /**
+     * 自定义code,返回描述与数据。业务异常
+     * @param code
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public static <T> Response<T> newSuccessResponse(String code,String msg,T t) {
+        Response<T> r = new Response<>();
+        r.setCode(code);
+        r.setMsg(msg);
+        r.setData(t);
+        return r;
+    }
+
+    /**
+     * 成功,并带描述与数据
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public static <T> Response<T> newSuccessResponse(T t) {
+        Response<T> r = new Response<>();
+        r.setCode(SYSTEM_FAIL_CODE);
+        r.setData(t);
+        return r;
+    }
+
+    /**
+     * 成功，带数据，无描述
+     * @param msg
+     * @param t
+     * @param <T>
+     * @return
+     */
     public static <T> Response<T> newSuccessResponse(String msg,T t) {
         Response<T> r = new Response<>();
-        r.setSuccess(OK);
+        r.setCode(SYSTEM_FAIL_CODE);
+        // 接口成功，但是需要部分前端提示
+        r.setMsg(msg);
         r.setData(t);
-        r.setError(new Error(OK_CODE, msg));
         return r;
     }
 
-    public static <T> Response<T> newSuccessResponse(T t) {
-        Response<T> r = new Response();
-        r.setSuccess(OK);
-        r.setData(t);
-        r.setError(new Response.Error("0000000", "成功"));
-        return r;
-    }
-
-    @Data
-    public static class Error implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private String code;
-
-        private String message;
-
-        public Error() {}
-
-        public Error(String code, String message) {
-            this.code = code;
-            this.message = message;
-        }
-
-    }
 }

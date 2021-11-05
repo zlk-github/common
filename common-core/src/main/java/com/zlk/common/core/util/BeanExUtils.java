@@ -82,7 +82,7 @@ public class BeanExUtils {
         }
         PageBean<V> pageBean = new PageBean<>();
         List<V> voList = new ArrayList<>();
-        if (CollectionUtils.isEmpty(source.getList())) {
+        if (!CollectionUtils.isEmpty(source.getList())) {
             source.getList().forEach(dto->{
                 V vo = convert.apply(dto);
                 voList.add(vo);
