@@ -44,9 +44,22 @@
         <fastjson.version>1.2.58</fastjson.version>
         <redisson.version>3.5.0</redisson.version>
         <rocketmq.version>4.6.1</rocketmq.version>
+        <spring.rocketmq.version>2.0.4</spring.rocketmq.version>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

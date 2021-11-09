@@ -12,12 +12,18 @@
     <artifactId>common-rocketmq</artifactId>
 
     <dependencies>
+       <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+           <version>${spring.rocketmq.version}</version>
+        </dependency>
+
         <!--rocketmq-->
-        <dependency>
+         <!-- <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
             <version>${rocketmq.version}</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
 </project>
