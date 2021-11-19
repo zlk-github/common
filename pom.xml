@@ -43,8 +43,8 @@
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <fastjson.version>1.2.58</fastjson.version>
         <redisson.version>3.5.0</redisson.version>
-        <rocketmq.version>4.6.1</rocketmq.version>
-        <spring.rocketmq.version>2.1.0</spring.rocketmq.version>
+        <rocketmq.version>4.9.1</rocketmq.version>
+        <spring.rocketmq.version>2.2.1</spring.rocketmq.version>
     </properties>
 
     <dependencies>
